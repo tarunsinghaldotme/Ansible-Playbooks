@@ -1,0 +1,40 @@
+---
+- hosts: hostnames
+  gather_facts: false
+  become: True
+  tasks:
+  - name: Run the equivalent of "apt-get update" as a separate step
+    apt:
+      update_cache: yes
+  - name: Install Systat
+    apt:
+      name: sysstat
+      state: latest
+
+  - name: Making sysstat to take records on every 5 minutes
+    replace:
+     path: /etc/cron.d/sysstat
+     regexp: '10'
+     replace: '5'
+     backup: yes
+
+  - name: Making sysstat to store backup of last 31 days
+    replace:
+     path: /etc/sysstat/sysstat
+     regexp: '7'
+     replace: '31'
+     backup: yes
+
+  - name: Enabling Report
+    replace:
+     path: /etc/default/sysstat
+     regexp: 'false'
+     replace: 'true'
+     backup: yes
+
+  - name: Enabling the service
+    service:
+     name: sysstat
+     state: started
+     enabled: yes
+
